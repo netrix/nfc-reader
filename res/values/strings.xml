@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">nfc-reader</string>
+    <string name="text_info">Hello, World!</string>
 </resources>
