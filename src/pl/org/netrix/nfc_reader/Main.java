@@ -47,8 +47,6 @@ public class Main extends Activity {
 		
 		if(mNfcHandler.isNfcIntent(intent)) {
 			mNfcHandler.handleNfcIntent(intent);
-		} else {
-			mStatus.setStatus("Scan Tag");
 		}
 	}
 	

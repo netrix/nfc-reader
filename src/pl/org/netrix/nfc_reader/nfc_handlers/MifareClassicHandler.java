@@ -17,30 +17,50 @@ public class MifareClassicHandler extends Handler {
 	public void handleTag(Tag tag) {
 		
 		MifareClassic mfc = MifareClassic.get(tag);
-		byte[] data;
 		
 		try {
 			mfc.connect();
 			
-			boolean auth = false;
-			String cardData = null;
+			mStatus.setStatus("Connected");
 			
-			mStatus.setStatus("Pending...");
-			auth = mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_MIFARE_APPLICATION_DIRECTORY);
+			mLogger.pushStatus("");
+			mLogger.pushStatus("== Info == ");
+			mLogger.pushStatus("Size: " + mfc.getSize());
+			mLogger.pushStatus("Timeout: " + mfc.getTimeout());
+			mLogger.pushStatus("Type: " + mfc.getType());
+			mLogger.pushStatus("BlockCount: " + mfc.getBlockCount());
+			mLogger.pushStatus("MaxTransceiveLength: " + mfc.getMaxTransceiveLength());
+			mLogger.pushStatus("SectorCount: " + mfc.getSectorCount());
 			
-			if(auth) {
-				mStatus.setStatus("auth ok");
-				data = mfc.readBlock(0);
-				cardData = Common.getHexString(data);
-				
-				if(cardData != null) {
-					mStatus.setStatus("auth ok\n" + cardData);
-				} else {
-					mStatus.setStatus("Failed to read");
-				}
-			} else {
-				mStatus.setStatus("auth no ok");
+			for(int i = 0; i < mfc.getSectorCount(); ++i) {
+				mLogger.pushStatus("BlockCount in sector " + i + ": " + mfc.getBlockCountInSector(i));
 			}
+			
+			mStatus.setStatus("Reading sectors...");
+			
+			
+			for(int i = 0; i < mfc.getSectorCount(); ++i) {
+				
+				if(mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_MIFARE_APPLICATION_DIRECTORY)) {
+					mLogger.pushStatus("Authorization granted to sector " + i + " with MAD key");
+				} else if(mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_DEFAULT)) {
+					mLogger.pushStatus("Authorization granted to sector " + i + " with DEFAULT key");
+				} else if(mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_NFC_FORUM)) {
+					mLogger.pushStatus("Authorization granted to sector " + i + " with NFC_FORUM key");
+				} else {
+					mLogger.pushStatus("Authorization denied to sector " + i);
+					continue;
+				}
+				
+				for(int k = 0; k < mfc.getBlockCountInSector(i); ++k)
+				{
+					String blockData = Common.getHexString(mfc.readBlock(k));
+					mLogger.pushStatus("Block " + k + " data: " + blockData);
+				}
+			}
+			
+			mLogger.pushStatus("");
+			
 		} catch (IOException e) {
 			mStatus.setStatus("Dupa");
 		}

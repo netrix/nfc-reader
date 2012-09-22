@@ -46,6 +46,13 @@ public class NfcHandler {
 		// Acquairing adapter
 		mAdapter = (NfcAdapter)NfcAdapter.getDefaultAdapter(activity);
 		
+		if(!mAdapter.isEnabled()) {
+			mStatus.setStatus("NFC is not enabled.");
+		} else {
+			mStatus.setStatus("Scan NFC tag");
+		}
+		
+		
 		// Creating PendingIndent for foreground dispatching
 		mPendingIntent = PendingIntent.getActivity(activity, 0, 
 				new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
