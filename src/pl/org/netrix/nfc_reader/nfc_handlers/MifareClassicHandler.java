@@ -41,11 +41,11 @@ public class MifareClassicHandler extends Handler {
 			
 			for(int i = 0; i < mfc.getSectorCount(); ++i) {
 				
-				if(mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_MIFARE_APPLICATION_DIRECTORY)) {
+				if(mfc.authenticateSectorWithKeyA(i, MifareClassic.KEY_MIFARE_APPLICATION_DIRECTORY)) {
 					mLogger.pushStatus("Authorization granted to sector " + i + " with MAD key");
-				} else if(mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_DEFAULT)) {
+				} else if(mfc.authenticateSectorWithKeyA(i, MifareClassic.KEY_DEFAULT)) {
 					mLogger.pushStatus("Authorization granted to sector " + i + " with DEFAULT key");
-				} else if(mfc.authenticateSectorWithKeyA(0, MifareClassic.KEY_NFC_FORUM)) {
+				} else if(mfc.authenticateSectorWithKeyA(i, MifareClassic.KEY_NFC_FORUM)) {
 					mLogger.pushStatus("Authorization granted to sector " + i + " with NFC_FORUM key");
 				} else {
 					mLogger.pushStatus("Authorization denied to sector " + i);
