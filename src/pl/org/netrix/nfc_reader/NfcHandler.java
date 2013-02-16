@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import pl.org.netrix.nfc_reader.nfc_handlers.IHandler;
 import pl.org.netrix.nfc_reader.nfc_handlers.IHandlerFactory;
 import pl.org.netrix.nfc_reader.nfc_handlers.MifareClassicFactory;
+import pl.org.netrix.nfc_reader.nfc_handlers.NfcAFactory;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -69,6 +70,7 @@ public class NfcHandler {
 		// Handlers
 		mFactoryMap = new HashMap<String, IHandlerFactory>();
 		mFactoryMap.put("android.nfc.tech.MifareClassic", new MifareClassicFactory(mLogger, mStatus));
+		mFactoryMap.put("android.nfc.tech.NfcA", new NfcAFactory(mLogger, mStatus));
 	}
 	
 	public void onResume()

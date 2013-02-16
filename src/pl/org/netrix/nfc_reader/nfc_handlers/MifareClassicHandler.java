@@ -7,6 +7,7 @@ import pl.org.netrix.nfc_reader.Logger;
 import pl.org.netrix.nfc_reader.NfcStatus;
 import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
+import android.webkit.WebView.FindListener;
 
 public class MifareClassicHandler extends Handler {
 
@@ -24,7 +25,7 @@ public class MifareClassicHandler extends Handler {
 			mStatus.setStatus("Connected");
 			
 			mLogger.pushStatus("");
-			mLogger.pushStatus("== Info == ");
+			mLogger.pushStatus("== MifareClassic Info == ");
 			mLogger.pushStatus("Size: " + mfc.getSize());
 			mLogger.pushStatus("Timeout: " + mfc.getTimeout());
 			mLogger.pushStatus("Type: " + mfc.getType());
@@ -37,7 +38,6 @@ public class MifareClassicHandler extends Handler {
 			}
 			
 			mStatus.setStatus("Reading sectors...");
-			
 			
 			for(int i = 0; i < mfc.getSectorCount(); ++i) {
 				
@@ -63,6 +63,13 @@ public class MifareClassicHandler extends Handler {
 			
 		} catch (IOException e) {
 			mStatus.setStatus(e.getMessage());
+		} finally {
+			try {
+				mfc.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
