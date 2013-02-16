@@ -62,7 +62,7 @@ public class MifareClassicHandler extends Handler {
 			mLogger.pushStatus("");
 			
 		} catch (IOException e) {
-			mStatus.setStatus("Dupa");
+			mStatus.setStatus(e.getMessage());
 		}
 
 	}

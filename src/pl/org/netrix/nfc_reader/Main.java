@@ -1,39 +1,45 @@
 package pl.org.netrix.nfc_reader;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Vector;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import android.app.Activity;
-import android.app.PendingIntent;
+import pl.org.netrix.nfc_reader.tabs.BrowserFragmentTab;
+import pl.org.netrix.nfc_reader.tabs.LogFragmentTab;
+import pl.org.netrix.nfc_reader.tabs.PageChangeListener;
+import pl.org.netrix.nfc_reader.tabs.PagerAdapter;
+import pl.org.netrix.nfc_reader.tabs.TabChangeListener;
+import pl.org.netrix.nfc_reader.tabs.TabFactory;
+import android.support.v4.app.Fragment;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentFilter.MalformedMimeTypeException;
-import android.content.res.XmlResourceParser;
-import android.nfc.NfcAdapter;
-import android.nfc.tech.MifareClassic;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
+import android.widget.TabHost;
 
-public class Main extends Activity {
+public class Main extends FragmentActivity {
 
 	private Logger mLogger = null;
-	private NfcStatus mStatus = null;
 	private NfcHandler mNfcHandler = null;
+	private NfcStatus mStatus = null;
+	
+	private ViewPager mViewPager = null;
+	private TabHost mTabHost = null;
+	private PagerAdapter mPagerAdapter = null;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
-		// Logger
-		mLogger = new Logger((TextView)findViewById(R.id.logger));
-		mLogger.pushStatus("onCreate");
 		
+		initializeTabs(savedInstanceState);
+		
+		// Initializing logger
+		mLogger = new Logger();
+		mLogger.pushStatus("onCreate");
+			
+
 		// NfcStatus
-		mStatus = new NfcStatus((TextView)findViewById(R.id.nfc_status));
+		mStatus = new NfcStatus();
 		
 		// NfcHandler
 		mNfcHandler = new NfcHandler(this, mStatus, mLogger);
@@ -43,7 +49,54 @@ public class Main extends Activity {
 		resolveIntent(intent);
 	}
 	
-	void resolveIntent(Intent intent) {
+	public Logger getLogger() {
+		return mLogger;
+	}
+	
+	public NfcStatus getStatus() {
+		return mStatus;
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString("tab", mTabHost.getCurrentTabTag());
+		super.onSaveInstanceState(outState);
+	}
+	
+	private void initializeTabs(Bundle savedInstanceState) {
+		
+		// Initializing TabHost
+		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
+		mTabHost.setup();
+		
+		addTab(mTabHost.newTabSpec("Browser").setIndicator("Browser"));
+		addTab(mTabHost.newTabSpec("Log").setIndicator("Log"));
+				
+		if(savedInstanceState != null) {
+			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
+		}
+		
+		// Initializing Fragments
+		List<Fragment> fragments = new Vector<Fragment>();
+		fragments.add(Fragment.instantiate(this, BrowserFragmentTab.class.getName()));
+		fragments.add(Fragment.instantiate(this, LogFragmentTab.class.getName()));
+		
+		mPagerAdapter = new PagerAdapter(getSupportFragmentManager(), fragments);
+		
+		mViewPager = (ViewPager)findViewById(R.id.viewpager);
+		mViewPager.setAdapter(mPagerAdapter);
+		
+		// Listeners
+		mTabHost.setOnTabChangedListener(new TabChangeListener(mTabHost, mViewPager));
+		mViewPager.setOnPageChangeListener(new PageChangeListener(mTabHost));	
+	}
+	
+	private void addTab(TabHost.TabSpec tabSpec) {
+		tabSpec.setContent(new TabFactory(this));
+		mTabHost.addTab(tabSpec);
+	}
+	
+	private void resolveIntent(Intent intent) {
 		
 		if(mNfcHandler.isNfcIntent(intent)) {
 			mNfcHandler.handleNfcIntent(intent);

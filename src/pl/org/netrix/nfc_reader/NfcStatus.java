@@ -1,18 +1,44 @@
 package pl.org.netrix.nfc_reader;
 
-import android.widget.TextView;
+import java.util.List;
+import java.util.Vector;
+
+import pl.org.netrix.nfc_reader.Logger.ILoggerListener;
 
 public class NfcStatus {
 
-	private TextView mTextView = null;
+	public interface IStatusListener {
+		
+		void update(String text);
+	}
 	
-	public NfcStatus(TextView textView)
+	private String mText = null;
+	private List<IStatusListener> mListeners = null;
+	
+	public NfcStatus()
 	{
-		mTextView = textView;
+		mText = new String();
+		mListeners = new Vector<IStatusListener>();
 	}
 	
 	public void setStatus(String status)
 	{
-		mTextView.setText(status);
+		mText = status;
+		
+    	for(IStatusListener l : mListeners) {
+    		l.update(mText);
+    	}
 	}
+	
+    public void registerListener(IStatusListener listener) {
+    	mListeners.add(listener);
+    }
+    
+    public final String getText() {
+    	return mText;
+    }
+    
+    public void unregisterListener(ILoggerListener listener) {
+    	mListeners.remove(listener);
+    }
 }

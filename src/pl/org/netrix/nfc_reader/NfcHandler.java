@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.MifareClassic;
 
 public class NfcHandler {
 	
