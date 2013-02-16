@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">nfc-reader</string>
     <string name="text_info">Hello, World!</string>
+    <string name="nfc_status_header">Nfc status:</string>
+    <string name="nfc_techlist_header">Current Tag tech list:</string>
 </resources>

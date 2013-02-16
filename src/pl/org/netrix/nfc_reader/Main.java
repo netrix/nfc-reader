@@ -57,6 +57,10 @@ public class Main extends FragmentActivity {
 		return mStatus;
 	}
 	
+	public NfcHandler getNfcHandler() {
+		return mNfcHandler;
+	}
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("tab", mTabHost.getCurrentTabTag());

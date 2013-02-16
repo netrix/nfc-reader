@@ -5,7 +5,13 @@ public class Common {
         String str = new String();
 
         for (byte b : raw) {
-            str += Integer.toHexString(b & 0xFF);
+        	String hex = Integer.toHexString(b & 0xFF);
+        	
+        	if(hex.length() == 1)  	{
+        		str += "0" + hex;
+        	} else {
+        		str += hex;
+        	}
         }   
 
         return str;

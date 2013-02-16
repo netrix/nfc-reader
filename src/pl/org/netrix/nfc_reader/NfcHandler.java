@@ -3,7 +3,9 @@ package pl.org.netrix.nfc_reader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -25,6 +27,10 @@ import android.nfc.Tag;
 
 public class NfcHandler {
 	
+	public interface ITagHandleListener {
+		void tagUpdated(TagInfo tagInfo);
+	}
+	
 	private Activity mActivity = null;
 	private NfcAdapter mAdapter = null;
 	
@@ -36,6 +42,10 @@ public class NfcHandler {
 	private Logger mLogger = null;
 	
 	private Map<String, IHandlerFactory> mFactoryMap = null;
+	
+	private TagInfo mTagInfo = null;
+	
+	private List<ITagHandleListener> mListeners = null;
 	
 	public NfcHandler(Activity activity, NfcStatus status, Logger logger)
 	{
@@ -52,10 +62,12 @@ public class NfcHandler {
 			mStatus.setStatus("Scan NFC tag");
 		}
 		
-		
 		// Creating PendingIndent for foreground dispatching
-		mPendingIntent = PendingIntent.getActivity(activity, 0, 
-				new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+		mPendingIntent = PendingIntent.getActivity(
+				activity, 
+				0, 
+				new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 
+				0);
 		
 		IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
 		try {
@@ -71,6 +83,8 @@ public class NfcHandler {
 		mFactoryMap = new HashMap<String, IHandlerFactory>();
 		mFactoryMap.put("android.nfc.tech.MifareClassic", new MifareClassicFactory(mLogger, mStatus));
 		mFactoryMap.put("android.nfc.tech.NfcA", new NfcAFactory(mLogger, mStatus));
+		
+		mListeners = new Vector<ITagHandleListener>();
 	}
 	
 	public void onResume()
@@ -90,10 +104,16 @@ public class NfcHandler {
 	
 	public void handleNfcIntent(Intent intent)
 	{
+		mStatus.setStatus("Handling tag...");
+		
 		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+		
+		mTagInfo = new TagInfo(tag.getTechList());
 
 		for(String tech : tag.getTechList())
 		{
+			mStatus.setStatus("Reading " + tech);
+			
 			if(mFactoryMap.containsKey(tech))
 			{
 				IHandler handler = mFactoryMap.get(tech).createHandler();
@@ -101,6 +121,19 @@ public class NfcHandler {
 			}
 		}
 		
+		mStatus.setStatus("Done");
+		
+		for(ITagHandleListener l : mListeners) {
+			l.tagUpdated(mTagInfo);
+		}
+	}
+	
+	public void registerTagHandleListener(ITagHandleListener listener) {
+		mListeners.add(listener);
+	}
+	
+	public void unregisterTagHandleListener(ITagHandleListener listener) {
+		mListeners.remove(listener);
 	}
 	
 	private static String[] getTechList(Resources resources)

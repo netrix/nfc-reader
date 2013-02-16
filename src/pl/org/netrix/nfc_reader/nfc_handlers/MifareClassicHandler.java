@@ -7,6 +7,7 @@ import pl.org.netrix.nfc_reader.Logger;
 import pl.org.netrix.nfc_reader.NfcStatus;
 import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
+import android.util.Log;
 import android.webkit.WebView.FindListener;
 
 public class MifareClassicHandler extends Handler {
@@ -38,9 +39,41 @@ public class MifareClassicHandler extends Handler {
 			}
 			
 			mStatus.setStatus("Reading sectors...");
+
+//			// Bruteforce key
+//			byte[] customKey = new byte[] { 0, 0, 0, 0, 0, 0 };
+//			
+//			boolean done = false;
+//			
+//			while(!done) {
+//
+//				if(mfc.authenticateSectorWithKeyA(1, customKey)) {
+//					mLogger.pushStatus("Success, key:");
+//					mLogger.pushStatus(Common.getHexString(customKey));
+//					break;
+//				}
+//				
+//				int i = 0;
+//				boolean overflow = false;
+//				
+//				// Incrementing
+//				do {
+//					if((customKey[i] & 0xff) == 255) {
+//						overflow = true;
+//						customKey[i] = 0;
+//						i++;
+//						Log.w("NfcReader", "Current key: " + Common.getHexString(customKey));
+//					} else {
+//						customKey[i]++;
+//						overflow = false;
+//					}
+//				} while(overflow && i < customKey.length);
+//				
+//				done = overflow;
+//			}
 			
 			for(int i = 0; i < mfc.getSectorCount(); ++i) {
-				
+								
 				if(mfc.authenticateSectorWithKeyA(i, MifareClassic.KEY_MIFARE_APPLICATION_DIRECTORY)) {
 					mLogger.pushStatus("Authorization granted to sector " + i + " with MAD key");
 				} else if(mfc.authenticateSectorWithKeyA(i, MifareClassic.KEY_DEFAULT)) {
@@ -52,17 +85,32 @@ public class MifareClassicHandler extends Handler {
 					continue;
 				}
 				
+				
 				for(int k = 0; k < mfc.getBlockCountInSector(i); ++k)
 				{
-					String blockData = Common.getHexString(mfc.readBlock(k));
-					mLogger.pushStatus("Block " + k + " data: " + blockData);
+					int block = mfc.sectorToBlock(i) + k;
+					
+					byte[] data = null;
+					
+					try {
+						
+						data = mfc.readBlock(block);
+					} catch (IOException e) {
+						mLogger.pushStatus("Block " + block + " data: " + e.getMessage());
+						continue;
+					}
+					
+					String blockData = Common.getHexString(data);
+					mLogger.pushStatus("Block " + block + " data: " + blockData);
 				}
 			}
+			
+			mfc.close();
 			
 			mLogger.pushStatus("");
 			
 		} catch (IOException e) {
-			mStatus.setStatus(e.getMessage());
+			mLogger.pushStatus(e.getMessage());
 		} finally {
 			try {
 				mfc.close();
@@ -71,7 +119,6 @@ public class MifareClassicHandler extends Handler {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 }
