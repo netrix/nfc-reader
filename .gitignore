@@ -1,3 +1,11 @@
 gen/
 bin/
 bin/*
+.idea/
+.gradle/
+gradle/
+import-summary.txt
+gradlew
+gradlew.bat
+local.properties
+app/build/*

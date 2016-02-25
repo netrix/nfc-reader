@@ -39,38 +39,6 @@ public class MifareClassicHandler extends Handler {
 			}
 			
 			mStatus.setStatus("Reading sectors...");
-
-//			// Bruteforce key
-//			byte[] customKey = new byte[] { 0, 0, 0, 0, 0, 0 };
-//			
-//			boolean done = false;
-//			
-//			while(!done) {
-//
-//				if(mfc.authenticateSectorWithKeyA(1, customKey)) {
-//					mLogger.pushStatus("Success, key:");
-//					mLogger.pushStatus(Common.getHexString(customKey));
-//					break;
-//				}
-//				
-//				int i = 0;
-//				boolean overflow = false;
-//				
-//				// Incrementing
-//				do {
-//					if((customKey[i] & 0xff) == 255) {
-//						overflow = true;
-//						customKey[i] = 0;
-//						i++;
-//						Log.w("NfcReader", "Current key: " + Common.getHexString(customKey));
-//					} else {
-//						customKey[i]++;
-//						overflow = false;
-//					}
-//				} while(overflow && i < customKey.length);
-//				
-//				done = overflow;
-//			}
 			
 			for(int i = 0; i < mfc.getSectorCount(); ++i) {
 								
